@@ -30,7 +30,7 @@ const ExamCourseList = () => {
                   >
                     <div className="inner-box">
                       <figure className="image-box">
-                        <a href={`${course._id}`}>
+                        <a href={`test/${course._id}`}>
                           <img
                             src={`${process.env.REACT_APP_API_URL_BPC}/${course.productImage}`}
                             alt={course.TestName}
@@ -39,7 +39,7 @@ const ExamCourseList = () => {
                       </figure>
                       <div className="lower-content">
                         <h3>
-                          <a href="course-details.html">{course.TestName}</a>
+                          <a href={`test/${course._id}`}>{course.TestName}</a>
                         </h3>
                       </div>
                     </div>

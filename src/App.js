@@ -16,7 +16,7 @@ import ExamCourseList from "./Pages/ExamCourseList";
 import ExamPage from "./Pages/ExamPage";
 import ExamResult from "./Pages/ExamResult";
 import ExamLogin from "./Pages/ExamLogin";
-import ExamFront from "./Pages/ExamCourseDetail";
+import ExamFront from "./Pages/ExamFront";
 
 
 
@@ -34,7 +34,7 @@ function App() {
             path="examCourse/:groupName"
             element={<PrivateRoute component={ExamCourseList} />}
           />
-          <Route path="examCourses/:id" element={<ExamFront />} />
+          <Route path="examCourse/test/:id" element={<ExamFront />} />
           <Route path="examPage" element={<ExamPage />} />
           <Route path="examResult" element={<ExamResult />} />
         </Route>

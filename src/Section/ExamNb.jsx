@@ -1,8 +1,29 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom';
 import logo from '../assets/images/home/logo.png';
+import { getIndustryUserMasterDetails } from '../Function/ExamIndex';
+import { Dropdown } from 'react-bootstrap';
 
 const ExamNb = () => {
+  const userId = localStorage.getItem("userId");
+  const [user, setUser] = useState({})
+
+  useEffect(()=>{
+    getIndustryUserMasterDetails(userId).then((response) => {
+      setUser(response.data);
+
+    });
+
+    const handleLogout = () => {
+      // Remove the token and user ID from local storage
+      localStorage.removeItem("token");
+      localStorage.removeItem("userId");
+
+      // Redirect to the login page
+      window.location.replace("/login");
+    };
+  },[userId])
+   
   return (
     <div>
       <header className="main-header style-three">
@@ -20,11 +41,20 @@ const ExamNb = () => {
               </ul>
               <ul className="header-nav pull-right">
                 <li>
-                  <a href="#">
-                    {" "}
-                    <i className="fa fa-user" aria-hidden="true"></i> &nbsp;
-                    Rushil Patel{" "}
-                  </a>
+                  <Dropdown>
+                    <Dropdown.Toggle href="#" id="dropdown-basic" variant='transperent'>
+                      {" "}
+                      <i className="fa fa-user" aria-hidden="true"></i> &nbsp;
+                      {user.Name}
+                    </Dropdown.Toggle>
+                    <Dropdown.Menu className='text-center'>
+                      <Dropdown.Item href="#" className='text-black'>Profile</Dropdown.Item>
+                      <Dropdown.Item href="#" className='text-black'>
+                        Logout
+                      </Dropdown.Item>
+                      
+                    </Dropdown.Menu>
+                  </Dropdown>
                 </li>
                 <li>
                   <a href="#">Help & Support</a>

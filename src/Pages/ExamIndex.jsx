@@ -1,10 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
-import cp1 from "../assets/images/home/cp-1.jpg"; // Adjust the path according to your project structure
-import cp2 from "../assets/images/home/cp-2.jpg";
-import cp3 from "../assets/images/home/cp-3.jpg";
-import cp4 from "../assets/images/home/cp-4.jpg";
-import cp5 from "../assets/images/home/cp-5.jpg";
+import img from "../assets/images/background/8d1e764488f9483b97d3aa8d63851725.jpg"; // Adjust the path according to your project structure
+
 import {
   getIndustryUserMasterDetails,
   getUserGroup,
@@ -17,14 +14,7 @@ const ExamIndex = () => {
   const [groupid, setGroupid]= useState("");
   const [userGroup, setUserGroup]= useState("");
     const [courses, setCourses] = useState([]);
-  const handleLogout = () => {
-    // Remove the token and user ID from local storage
-    localStorage.removeItem("token");
-    localStorage.removeItem("userId");
-
-    // Redirect to the login page
-    window.location.replace("/login");
-  };
+  
   
 const userId = localStorage.getItem("userId");
 
@@ -66,8 +56,8 @@ useEffect(()=>{
                   >
                     <div className="inner-box">
                       <figure className="image-box">
-                        <a href={course.categoryName}>
-                          <img src={course.imageUrl} alt={course.altText} />
+                        <a href={`examCourse/${course.categoryName}`}>
+                          <img src={img} alt={course.altText} />
                         </a>
                       </figure>
                       <div className="lower-content">

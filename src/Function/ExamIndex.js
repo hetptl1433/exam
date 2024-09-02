@@ -23,3 +23,9 @@ export const getIndustryUserMasterDetails = async (_id) => {
       `${process.env.REACT_APP_API_URL_BPC}/api/auth/list/TestCatMaster-details/${groupName}`
     );
   };
+
+  export const getTestCatMasterDetails = async (_id) => {
+    return await axios.get(
+      `${process.env.REACT_APP_API_URL_BPC}/api/auth/get/TestCatMaster-details/${_id}`
+    );
+  };
