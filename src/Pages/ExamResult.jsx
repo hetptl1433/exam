@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react'
 import "animate.css";
 import WOW from "wowjs";
+import { Link } from 'react-router-dom';
 
 // Initialize WOW.js
 new WOW.WOW().init();
@@ -38,9 +39,9 @@ const ExamResult = () => {
             </div>
           </div>
           <div className="more-btn mt-3">
-            <a href="index.html" className="theme-btn-two">
+            <Link to="/examIndex" className="theme-btn-two">
               Home Page
-            </a>
+            </Link>
           </div>
         </div>
       </section>

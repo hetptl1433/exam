@@ -29,3 +29,24 @@ export const getIndustryUserMasterDetails = async (_id) => {
       `${process.env.REACT_APP_API_URL_BPC}/api/auth/get/TestCatMaster-details/${_id}`
     );
   };
+
+    export const getTestQuestions = async (_id) => {
+      return await axios.get(
+        `${process.env.REACT_APP_API_URL_BPC}/api/auth/location/TestQuestionMasterId/${_id}`
+      );
+    };
+
+
+export const createTestData = async (values) => {
+  return await axios.post(
+    `${process.env.REACT_APP_API_URL_BPC}/api/auth/create/ResultAns`,
+    values
+  );
+};
+
+export const createTestResult = async (values) => {
+  return await axios.post(
+    `${process.env.REACT_APP_API_URL_BPC}/api/auth/create/ResultData`,
+    values
+  );
+};

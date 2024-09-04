@@ -1,23 +1,206 @@
-import React, { useState } from "react";
-import "bootstrap/dist/css/bootstrap.min.css"; // Make sure to include Bootstrap CSS
-
+import React, { useEffect, useState } from "react";
+import "bootstrap/dist/css/bootstrap.min.css";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { createTestData, createTestResult, getTestCatMasterDetails, getTestQuestions } from "../Function/ExamIndex";
+import { useHistory } from "react-router-dom";
 const ExamPage = () => {
+   const navigate = useNavigate();
+
+  const { id, Language } = useParams();
+  const [questionData, setQuestionData] = useState([]);
   const [activeTab, setActiveTab] = useState("question-box-1");
-  const [selectedOptions, setSelectedOptions] = useState({
-    question1: "",
-    question4: "",
-    question7: "",
-  });
+  const [selectedOptions, setSelectedOptions] = useState({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const [remainingTime, setRemainingTime] = useState(0);
+  const [totalTime, setTotalTime] = useState(0);
+  
+  const [IsActive, setIsActive] = useState(true);
+
+  const [currentQuestionNumber, setCurrentQuestionNumber] = useState(1);
+  const userId = localStorage.getItem("userId");
+
+  const questionsPerPage = 10;
+
+  useEffect(() => {
+    // Fetch questions and total time
+    const fetchData = async () => {
+      try {
+        const res = await getTestQuestions(id);
+        const sortedQuestions = res.data.sort(
+          (a, b) => a.SortOrder - b.SortOrder
+        );
+        setQuestionData(sortedQuestions);
+        const testRes= await getTestCatMasterDetails(id);
+        
+       const totalTimeInSeconds = testRes.data.TotalTime;
+       const totalTimeInMinutes = totalTimeInSeconds * 60;
+       setTotalTime(totalTimeInMinutes);
+       console.log(totalTimeInMinutes);
+        const totalTime = totalTimeInMinutes; 
+        setRemainingTime(totalTime);
+
+        // Start countdown timer
+        const timer = setInterval(() => {
+          setRemainingTime((prevTime) => {
+            if (prevTime <= 1) {
+              clearInterval(timer);
+              handleSubmit(); // Automatically submit when time runs out
+              return 0;
+            }
+            return prevTime - 1;
+          });
+        }, 1000);
+
+        return () => clearInterval(timer); // Cleanup interval on component unmount
+      } catch (error) {
+        console.error("Error fetching test questions:", error);
+      }
+    };
+
+    fetchData();
+  }, [id]);
 
   const handleTabChange = (tabId) => {
     setActiveTab(tabId);
   };
-
-  const handleRadioChange = (question, value) => {
-    setSelectedOptions((prevOptions) => ({
+const handleRadioChange = (questionId, value, pointMasterId) => {
+  setSelectedOptions((prevOptions) => {
+    const newOptions = {
       ...prevOptions,
-      [question]: value,
-    }));
+      [questionId]: { value, pointMasterId },
+    };
+
+    // Determine the index of the current question
+    const currentQuestionIndex = questionData.findIndex(
+      (q) => q._id === questionId
+    );
+
+    // Incremental question number, considering the page
+    const questionNumber = startIdx + currentQuestionIndex + 1;
+
+    setCurrentQuestionNumber(questionNumber);
+    return newOptions;
+  });
+};
+
+
+
+
+  const handleNextPage = () => {
+    if (validatePage()) {
+      setCurrentPage((prevPage) => prevPage + 1);
+    } else {
+      window.alert(
+        "Please select an option for all questions before proceeding."
+      );
+    }
+  };
+
+  const handlePrevPage = () => {
+    setCurrentPage((prevPage) => prevPage - 1);
+  };
+
+const handleSubmit = async () => {
+  
+  if (validatePage()) {
+    const currentDate = new Date().toISOString();
+    console.log(currentDate);
+    const usedTime = totalTime - remainingTime;
+
+    // Prepare data for creating test result
+    const testResultData = {
+      userId,
+      id,
+      TotalTime: usedTime, // Or calculate the total time in seconds
+      ExamDate: currentDate, // Or use a more appropriate date if needed
+      IsActive,
+    };
+
+    // Create the test result
+    try {
+      await createTestResult(testResultData);
+      console.log("Test result created successfully.");
+    } catch (error) {
+      console.error("Error creating test result:", error);
+    }
+
+    // Prepare submission data
+    const submissionData = Object.entries(selectedOptions).map(
+      ([questionId, { value, pointMasterId }]) => {
+        // Find the current question index for each entry
+        const questionIndex = questionData.findIndex(
+          (q) => q._id === questionId
+        );
+
+        // Determine the question number based on the index
+        const questionNumber = questionIndex + 1;
+
+        return {
+          userId,
+          id,
+          Language,
+          questionId,
+          selectedOption: value,
+          pointMasterId,
+          questionNumber,
+          IsActive,
+        };
+      }
+    );
+
+    // Log the submission data
+    console.log("Form submitted with the following answers:", submissionData);
+
+    // Send each entry to createTestData
+    try {
+      await Promise.all(
+        submissionData.map(async (entry) => {
+          await createTestData(entry);
+        })
+      );
+      console.log("All test results created successfully.");
+    } catch (error) {
+      console.error("Error creating test results:", error);
+    }
+
+    console.log(
+      "Time remaining:",
+      remainingTime,
+      "seconds",
+      usedTime,
+      totalTime
+    );
+    
+    navigate("/examResult");  
+
+    //  Navigate(`/examResult`);
+  } else {
+    window.alert(
+      "Please select an option for all questions before submitting."
+    );
+  }
+};
+
+
+
+
+
+  const validatePage = () => {
+    const startIdx = (currentPage - 1) * questionsPerPage;
+    const endIdx = startIdx + questionsPerPage;
+    const currentQuestions = questionData.slice(startIdx, endIdx);
+
+    return currentQuestions.every((question) => selectedOptions[question._id]);
+  };
+
+  const startIdx = (currentPage - 1) * questionsPerPage;
+  const endIdx = startIdx + questionsPerPage;
+  const currentQuestions = questionData.slice(startIdx, endIdx);
+
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${minutes}:${secs < 10 ? "0" : ""}${secs}`;
   };
 
   return (
@@ -28,14 +211,15 @@ const ExamPage = () => {
             <div className="service-details-content">
               <div className="inner-box">
                 <div className="top-content">
-                  <div className="sec-title">
+                  <div className="sec-title d-flex justify-content-between align-items-center">
                     <h2>Study Habit Inventory</h2>
-                    <p>
-                      Welcome to the Study Habit Inventory! Please answer the
-                      following questions to help us understand your study
-                      habits and preferences.
-                    </p>
+                    <p>Time Remaining: {formatTime(remainingTime)}</p>
                   </div>
+                  <p>
+                    Welcome to the Study Habit Inventory! Please answer the
+                    following questions to help us understand your study habits
+                    and preferences.
+                  </p>
 
                   <div id="page-wrap">
                     <ul className="nav nav-tabs" id="myTab" role="tablist">
@@ -49,345 +233,171 @@ const ExamPage = () => {
                           Home
                         </a>
                       </li>
-                      <li className="nav-item">
-                        <a
-                          className={`nav-link ${
-                            activeTab === "question-box-2" ? "active" : ""
-                          }`}
-                          onClick={() => handleTabChange("question-box-2")}
-                        >
-                          Profile
-                        </a>
-                      </li>
-                      <li className="nav-item">
-                        <a
-                          className={`nav-link ${
-                            activeTab === "question-box-3" ? "active" : ""
-                          }`}
-                          onClick={() => handleTabChange("question-box-3")}
-                        >
-                          Contact
-                        </a>
-                      </li>
                     </ul>
 
                     <div className="tab-content" id="myTabContent">
-                      {/* Question Box 1 */}
-                      {activeTab === "question-box-1" && (
+                      {currentQuestions.map((question) => (
                         <div
-                          className="tab-pane fade show active"
-                          id="question-box-1"
+                          key={question._id}
+                          className={`tab-pane fade ${
+                            activeTab === "question-box-1" ? "show active" : ""
+                          }`}
                           role="tabpanel"
                           aria-labelledby="question-tab-1"
                         >
                           <div className="text question-box">
-                            <p className="mb-1">Question : 1</p>
-                            <p>
-                              How would you describe your motivation towards
-                              achieving significant goals?
-                            </p>
                             <div className="row">
-                              <div className="col-md-9 col-lg-7">
-                                <ul>
-                                  <li>
-                                    (a) I would like to accomplish something of
-                                    great significance.
-                                  </li>
-                                  <li>
-                                    (b) I like to find out what great men have
-                                    thought about various problems in which I am
-                                    interested.
-                                  </li>
-                                  <li>
-                                    (a) कोई अत्यधिक महत्व का कार्य करना मुझे
-                                    पसंद है |
-                                  </li>
-                                  <li>
-                                    (b) जिन प्रश्नों में मुझे रुचि है, उन पर
-                                    महापुरुषों के विचार जानना मुझे अच्छा लगता है
-                                    |
-                                  </li>
-                                  <li>
-                                    (a) હું કોઈ અતિ મહત્વનું કાર્ય કરવાનું પસંદ
-                                    કરીશ.
-                                  </li>
-                                  <li>
-                                    (b) મને જે પ્રશ્નોમાં રસ છે તે પ્રશ્નો વિશે
-                                    મહાન પુરૂષોએ શું વિચાર્યું છે તે જાણવાનું
-                                    મને ગમે છે.
-                                  </li>
-                                </ul>
+                              <div className="col-md-7">
+                                <p className="mb-1">
+                                  Question : {question.SortOrder}
+                                </p>
+                                <div className="">
+                                  {Language === "english" && (
+                                    <>
+                                      <div
+                                        dangerouslySetInnerHTML={{
+                                          __html: question.EngQues,
+                                        }}
+                                      ></div>
+                                      <div
+                                        dangerouslySetInnerHTML={{
+                                          __html: question.HinQues,
+                                        }}
+                                      ></div>
+                                    </>
+                                  )}
+                                  {Language === "hindi" && (
+                                    <>
+                                      <div
+                                        dangerouslySetInnerHTML={{
+                                          __html: question.HinQues,
+                                        }}
+                                      ></div>
+                                      <div
+                                        dangerouslySetInnerHTML={{
+                                          __html: question.EngQues,
+                                        }}
+                                      ></div>
+                                    </>
+                                  )}
+                                  {Language === "gujarati" && (
+                                    <>
+                                      <div
+                                        dangerouslySetInnerHTML={{
+                                          __html: question.GujQues,
+                                        }}
+                                      ></div>
+                                      <div
+                                        dangerouslySetInnerHTML={{
+                                          __html: question.EngQues,
+                                        }}
+                                      ></div>
+                                    </>
+                                  )}
+                                </div>
                               </div>
-                              <div className="col-md-3 col-lg-5">
+                              <div className="col-md-3 col-lg-5 p-5">
                                 <div className="ans-radio text-left">
-                                  <div className="form-check">
-                                    <input
-                                      className="form-check-input"
-                                      type="radio"
-                                      name="question1"
-                                      id="inlineRadio1"
-                                      value="option1"
-                                      checked={
-                                        selectedOptions.question1 === "option1"
+                                  {["A", "B", "C", "D", "E"].map(
+                                    (option, index) => {
+                                      const answerKey = `EngAns${option}`;
+                                      const pointMasterIdKey = `PointSelID${option}`;
+                                      const selectedValue = `PointSelID${option}`;
+
+                                      if (question[answerKey]) {
+                                        return (
+                                          <div
+                                            className="form-check"
+                                            key={index}
+                                          >
+                                            <input
+                                              className="form-check-input"
+                                              type="radio"
+                                              name={question._id}
+                                              id={`inlineRadio${question._id}-${
+                                                index + 1
+                                              }`}
+                                              value={option} // Pass 'option' directly as value
+                                              checked={
+                                                selectedOptions[question._id]
+                                                  ?.value === option
+                                              }
+                                              onChange={() =>
+                                                handleRadioChange(
+                                                  question._id,
+                                                  option,
+                                                  question[pointMasterIdKey] // Pass pointMasterId
+                                                )
+                                              }
+                                            />
+                                            <label
+                                              className="form-check-label"
+                                              htmlFor={`inlineRadio${
+                                                question._id
+                                              }-${index + 1}`}
+                                            >
+                                              <div
+                                                dangerouslySetInnerHTML={{
+                                                  __html:
+                                                    Language === "english"
+                                                      ? question[answerKey]
+                                                      : Language === "hindi"
+                                                      ? question[
+                                                          `HinAns${option}`
+                                                        ]
+                                                      : question[
+                                                          `GujAns${option}`
+                                                        ],
+                                                }}
+                                              ></div>
+                                            </label>
+                                          </div>
+                                        );
                                       }
-                                      onChange={() =>
-                                        handleRadioChange(
-                                          "question1",
-                                          "option1"
-                                        )
-                                      }
-                                    />
-                                    <label
-                                      className="form-check-label"
-                                      htmlFor="inlineRadio1"
-                                    >
-                                      1 : I would like to accomplish something
-                                      of great significance.
-                                    </label>
-                                  </div>
-                                  <div className="form-check">
-                                    <input
-                                      className="form-check-input"
-                                      type="radio"
-                                      name="question1"
-                                      id="inlineRadio2"
-                                      value="option2"
-                                      checked={
-                                        selectedOptions.question1 === "option2"
-                                      }
-                                      onChange={() =>
-                                        handleRadioChange(
-                                          "question1",
-                                          "option2"
-                                        )
-                                      }
-                                    />
-                                    <label
-                                      className="form-check-label"
-                                      htmlFor="inlineRadio2"
-                                    >
-                                      2 : I like to find out what great men have
-                                      thought about various problems in which I
-                                      am interested.
-                                    </label>
-                                  </div>
+
+                                      return null;
+                                    }
+                                  )}
                                 </div>
                               </div>
                             </div>
                           </div>
-
-                          {/* Repeat similar blocks for additional questions in this tab */}
                         </div>
-                      )}
+                      ))}
 
-                      {/* Question Box 2 */}
-                      {activeTab === "question-box-2" && (
-                        <div
-                          className="tab-pane fade"
-                          id="question-box-2"
-                          role="tabpanel"
-                          aria-labelledby="question-tab-2"
-                        >
-                          <div className="text question-box">
-                            <p className="mb-1">Question : 4</p>
-                            <p>
-                              Which approach resonates more with your study
-                              habits?
-                            </p>
-                            <div className="row">
-                              <div className="col-md-9 col-lg-11">
-                                <ul>
-                                  <li>
-                                    (a) I would like to accomplish something of
-                                    great significance.
-                                  </li>
-                                  <li>
-                                    (b) I like to find out what great men have
-                                    thought about various problems in which I am
-                                    interested.
-                                  </li>
-                                  <li>
-                                    (a) कोई अत्यधिक महत्व का कार्य करना मुझे
-                                    पसंद है |
-                                  </li>
-                                  <li>
-                                    (b) जिन प्रश्नों में मुझे रुचि है, उन पर
-                                    महापुरुषों के विचार जानना मुझे अच्छा लगता है
-                                    |
-                                  </li>
-                                  <li>
-                                    (a) હું કોઈ અતિ મહત્વનું કાર્ય કરવાનું પસંદ
-                                    કરીશ.
-                                  </li>
-                                  <li>
-                                    (b) મને જે પ્રશ્નોમાં રસ છે તે પ્રશ્નો વિશે
-                                    મહાન પુરૂષોએ શું વિચાર્યું છે તે જાણવાનું
-                                    મને ગમે છે.
-                                  </li>
-                                </ul>
-                              </div>
-                              <div className="col-md-3 col-lg-1">
-                                <div className="ans-radio">
-                                  <div className="form-check form-check-inline">
-                                    <input
-                                      className="form-check-input"
-                                      type="radio"
-                                      name="question4"
-                                      id="inlineRadio4-1"
-                                      value="option1"
-                                      checked={
-                                        selectedOptions.question4 === "option1"
-                                      }
-                                      onChange={() =>
-                                        handleRadioChange(
-                                          "question4",
-                                          "option1"
-                                        )
-                                      }
-                                    />
-                                    <label
-                                      className="form-check-label"
-                                      htmlFor="inlineRadio4-1"
-                                    >
-                                      1
-                                    </label>
-                                  </div>
-                                  <div className="form-check form-check-inline">
-                                    <input
-                                      className="form-check-input"
-                                      type="radio"
-                                      name="question4"
-                                      id="inlineRadio4-2"
-                                      value="option2"
-                                      checked={
-                                        selectedOptions.question4 === "option2"
-                                      }
-                                      onChange={() =>
-                                        handleRadioChange(
-                                          "question4",
-                                          "option2"
-                                        )
-                                      }
-                                    />
-                                    <label
-                                      className="form-check-label"
-                                      htmlFor="inlineRadio4-2"
-                                    >
-                                      2
-                                    </label>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
+                      <div className="pagination-controls mt-3 d-flex  justify-content-end">
+                        {currentPage > 1 && (
+                          <div className="justify-content-start mr-3">
+                            <button
+                              type="button"
+                              className="theme-btn-two prev"
+                              onClick={handlePrevPage}
+                            >
+                              Prev Page
+                            </button>
                           </div>
-
-                          {/* Repeat similar blocks for additional questions in this tab */}
-                        </div>
-                      )}
-
-                      {/* Question Box 3 */}
-                      {activeTab === "question-box-3" && (
-                        <div
-                          className="tab-pane fade"
-                          id="question-box-3"
-                          role="tabpanel"
-                          aria-labelledby="question-tab-3"
-                        >
-                          <div className="text question-box">
-                            <p className="mb-1">Question : 7</p>
-                            <p>
-                              How do you prefer to approach solving problems?
-                            </p>
-                            <div className="row">
-                              <div className="col-md-9 col-lg-11">
-                                <ul>
-                                  <li>
-                                    (a) I would like to accomplish something of
-                                    great significance.
-                                  </li>
-                                  <li>
-                                    (b) I like to find out what great men have
-                                    thought about various problems in which I am
-                                    interested.
-                                  </li>
-                                  <li>
-                                    (a) कोई अत्यधिक महत्व का कार्य करना मुझे
-                                    पसंद है |
-                                  </li>
-                                  <li>
-                                    (b) जिन प्रश्नों में मुझे रुचि है, उन पर
-                                    महापुरुषों के विचार जानना मुझे अच्छा लगता है
-                                    |
-                                  </li>
-                                  <li>
-                                    (a) હું કોઈ અતિ મહત્વનું કાર્ય કરવાનું પસંદ
-                                    કરીશ.
-                                  </li>
-                                  <li>
-                                    (b) મને જે પ્રશ્નોમાં રસ છે તે પ્રશ્નો વિશે
-                                    મહાન પુરૂષોએ શું વિચાર્યું છે તે જાણવાનું
-                                    મને ગમે છે.
-                                  </li>
-                                </ul>
-                              </div>
-                              <div className="col-md-3 col-lg-1">
-                                <div className="ans-radio">
-                                  <div className="form-check form-check-inline">
-                                    <input
-                                      className="form-check-input"
-                                      type="radio"
-                                      name="question7"
-                                      id="inlineRadio7-1"
-                                      value="option1"
-                                      checked={
-                                        selectedOptions.question7 === "option1"
-                                      }
-                                      onChange={() =>
-                                        handleRadioChange(
-                                          "question7",
-                                          "option1"
-                                        )
-                                      }
-                                    />
-                                    <label
-                                      className="form-check-label"
-                                      htmlFor="inlineRadio7-1"
-                                    >
-                                      1
-                                    </label>
-                                  </div>
-                                  <div className="form-check form-check-inline">
-                                    <input
-                                      className="form-check-input"
-                                      type="radio"
-                                      name="question7"
-                                      id="inlineRadio7-2"
-                                      value="option2"
-                                      checked={
-                                        selectedOptions.question7 === "option2"
-                                      }
-                                      onChange={() =>
-                                        handleRadioChange(
-                                          "question7",
-                                          "option2"
-                                        )
-                                      }
-                                    />
-                                    <label
-                                      className="form-check-label"
-                                      htmlFor="inlineRadio7-2"
-                                    >
-                                      2
-                                    </label>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
+                        )}
+                        {endIdx < questionData.length ? (
+                          <div className=" d-flex justify-content-end">
+                            <button
+                              type="button"
+                              className="theme-btn-two next"
+                              onClick={handleNextPage}
+                            >
+                              Next Page
+                            </button>
                           </div>
-
-                          {/* Repeat similar blocks for additional questions in this tab */}
-                        </div>
-                      )}
+                        ) : (
+                          <div className="justify-content-center">
+                            <button
+                              onClick={handleSubmit}
+                              className="theme-btn-two "
+                            >
+                              Submit
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>

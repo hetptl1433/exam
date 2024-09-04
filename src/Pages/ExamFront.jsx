@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { getTestCatMasterDetails } from "../Function/ExamIndex";
 
 const ExamFront = () => {
   const [activeTab, setActiveTab] = useState("tab-1");
-  const [testdata, setTestData] = useState(null); // Set initial active tab
+  const [testdata, setTestData] = useState(null);
   const { id } = useParams();
+  
+  const navigate = useNavigate();
 
   useEffect(() => {
     getTestCatMasterDetails(id).then((res) => {
@@ -15,6 +17,28 @@ const ExamFront = () => {
 
   const handleTabClick = (tabId) => {
     setActiveTab(tabId);
+  };
+
+  const handleSubmit = () => {
+    let language = "";
+
+    // Determine the language based on the selected tab
+    switch (activeTab) {
+      case "tab-1":
+        language = "english";
+        break;
+      case "tab-2":
+        language = "hindi";
+        break;
+      case "tab-3":
+        language = "gujarati";
+        break;
+      default:
+        language = "";
+    }
+
+    // Navigate to the new URL
+    navigate(`/examCourse/test/${id}/${language}`);
   };
 
   if (!testdata) {
@@ -136,9 +160,13 @@ const ExamFront = () => {
           </div>
           <div className="tab d-block transform-none">
             <div className="text-center form-group message-btn mt-4">
-              <a href="exam-page.html" className="theme-btn-two">
+              <button
+                type="button"
+                className="theme-btn-two"
+                onClick={handleSubmit}
+              >
                 Start Exam
-              </a>
+              </button>
             </div>
           </div>
         </div>

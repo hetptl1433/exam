@@ -367,6 +367,38 @@ img {
   z-index: 1;
   transition: all 500ms ease;
 }
+.theme-btn-two.next{
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  font-size: 16px;
+  font-weight: 500;
+  color: #fff;
+  background: green;
+  border-radius: 30px;
+  text-align: center;
+  padding: 10px 30px;
+  cursor: pointer;
+  z-index: 1;
+  transition: all 500ms ease;
+}
+.theme-btn-two.prev{
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  font-size: 16px;
+  font-weight: 500;
+  color: #fff;
+  background: red;
+  border-radius: 30px;
+  text-align: center;
+  padding: 10px 30px;
+  cursor: pointer;
+  z-index: 1;
+  transition: all 500ms ease;
+}
+
+
 
 .theme-btn-two:before {
   position: absolute;
@@ -21194,13 +21226,13 @@ div#mCSB_1_container{
     margin-bottom:0px;
 }
 
-.question-box p {
+/* .question-box p {
         border-bottom: 1px dotted #4b4b4b;
     font-weight: 600;
     color: #404040;
     margin-bottom: 12px !important;
     padding-bottom: 5px;
-}
+} */
 
 .question-box ul {
 

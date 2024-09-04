@@ -1,8 +1,9 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
 import Layout from "./Layout";
-import Pages from "./Pages";
+import Pages from "./Pages";  
 import "./assets/css/bootstrap.css";
+
 import "./assets/css/style.css";
 import ExamIndex from "./Pages/ExamIndex";
 import "./assets/css/animate.css"
@@ -27,15 +28,21 @@ function App() {
         <Route path="/" element={<Layout />}>
           <Route index element={<ExamLogin />} />
           <Route
-            path="/exam-dashboard"
+            path="/examIndex"
             element={<PrivateRoute component={ExamIndex} />}
           />
           <Route
             path="examCourse/:groupName"
             element={<PrivateRoute component={ExamCourseList} />}
           />
-          <Route path="examCourse/test/:id" element={<ExamFront />} />
-          <Route path="examPage" element={<ExamPage />} />
+          <Route
+            path="examCourse/test/:id"
+            element={<PrivateRoute component={ExamFront} />}
+          />
+          <Route
+            path="examCourse/test/:id/:Language"
+            element={<PrivateRoute component={ExamPage} />}
+          />
           <Route path="examResult" element={<ExamResult />} />
         </Route>
       </Routes>
