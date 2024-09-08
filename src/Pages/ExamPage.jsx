@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { createTestData, createTestResult, getTestCatMasterDetails, getTestQuestions } from "../Function/ExamIndex";
-import { useHistory } from "react-router-dom";
 const ExamPage = () => {
    const navigate = useNavigate();
 
@@ -101,7 +100,6 @@ const handleRadioChange = (questionId, value, pointMasterId) => {
   };
 
 const handleSubmit = async () => {
-  
   if (validatePage()) {
     const currentDate = new Date().toISOString();
     console.log(currentDate);
@@ -111,8 +109,8 @@ const handleSubmit = async () => {
     const testResultData = {
       userId,
       id,
-      TotalTime: usedTime, // Or calculate the total time in seconds
-      ExamDate: currentDate, // Or use a more appropriate date if needed
+      TotalTime: usedTime,
+      ExamDate: currentDate,
       IsActive,
     };
 
@@ -122,17 +120,15 @@ const handleSubmit = async () => {
       console.log("Test result created successfully.");
     } catch (error) {
       console.error("Error creating test result:", error);
+      return;
     }
 
-    // Prepare submission data
+    // Prepare submission data in one array
     const submissionData = Object.entries(selectedOptions).map(
       ([questionId, { value, pointMasterId }]) => {
-        // Find the current question index for each entry
         const questionIndex = questionData.findIndex(
           (q) => q._id === questionId
         );
-
-        // Determine the question number based on the index
         const questionNumber = questionIndex + 1;
 
         return {
@@ -151,16 +147,12 @@ const handleSubmit = async () => {
     // Log the submission data
     console.log("Form submitted with the following answers:", submissionData);
 
-    // Send each entry to createTestData
+    // Send the entire array of entries to createTestData in one API call
     try {
-      await Promise.all(
-        submissionData.map(async (entry) => {
-          await createTestData(entry);
-        })
-      );
-      console.log("All test results created successfully.");
+      await createTestData(submissionData); // Send all data at once
+      console.log("All test results sent successfully.");
     } catch (error) {
-      console.error("Error creating test results:", error);
+      console.error("Error sending test results:", error);
     }
 
     console.log(
@@ -170,16 +162,15 @@ const handleSubmit = async () => {
       usedTime,
       totalTime
     );
-    
-    navigate("/examResult");  
 
-    //  Navigate(`/examResult`);
+    navigate("/examResult");
   } else {
     window.alert(
       "Please select an option for all questions before submitting."
     );
   }
 };
+
 
 
 

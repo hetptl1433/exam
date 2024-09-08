@@ -1,10 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
+import { toast, ToastContainer } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
+
 import { listTestGroupByName } from "../Function/ExamIndex";
+import axios from "axios";
 
 const ExamCourseList = () => {
+  const navigate = useNavigate();
   const { groupName } = useParams();
   const [courses, setCourses] = useState([]);
+  const userId = localStorage.getItem("userId");
 
   useEffect(() => {
     listTestGroupByName(groupName).then((response) => {
@@ -12,8 +18,33 @@ const ExamCourseList = () => {
     });
   }, [groupName]);
 
+      const checkUserData = async (courseId) => {
+        try {
+          const response = await axios.get(
+            `${process.env.REACT_APP_API_URL_BPC}/api/auth/get/ResultData/${courseId}/${userId}`
+          );
+
+          // If data is found, proceed with navigation
+          if (response.status === 200 && response.data) {
+            toast.error(
+              "You can only give test once"
+            );
+          }
+        } catch (error) {
+          if (error.response && error.response.status === 404) {
+            navigate(`/examCourse/test/${courseId}`);
+            
+          } else {
+            toast.error("An error occurred while checking the data.");
+          }
+        }
+      };
+
+
+
   return (
     <div>
+      <ToastContainer/>
       <section className="news-style-two banner-style-18">
         <div className="container">
           <div className="inner-content">
@@ -25,12 +56,12 @@ const ExamCourseList = () => {
                 >
                   <div
                     className="news-block-two wow fadeInUp"
-                    data-wow-delay={`300ms`}
+                    data-wow-delay="300ms"
                     data-wow-duration="1500ms"
                   >
                     <div className="inner-box">
                       <figure className="image-box">
-                        <a href={`test/${course._id}`}>
+                        <a onClick={() => checkUserData(`${course._id}`)}>
                           <img
                             src={`${process.env.REACT_APP_API_URL_BPC}/${course.productImage}`}
                             alt={course.TestName}
@@ -39,7 +70,9 @@ const ExamCourseList = () => {
                       </figure>
                       <div className="lower-content">
                         <h3>
-                          <a href={`test/${course._id}`}>{course.TestName}</a>
+                          <a onClick={() => checkUserData(`${course._id}`)}>
+                            {course.TestName}
+                          </a>
                         </h3>
                       </div>
                     </div>
