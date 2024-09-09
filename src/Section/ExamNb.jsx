@@ -7,6 +7,19 @@ import { Dropdown } from 'react-bootstrap';
 const ExamNb = () => {
   const userId = localStorage.getItem("userId");
   const [user, setUser] = useState({})
+   const handleLogout = () => {
+     // Remove the token and user ID from local storage
+     try{
+    //  localStorage.removeItem("token");
+    //  localStorage.removeItem("userId");
+
+     // Redirect to the login page
+     window.location.replace("/");
+     }
+     catch(err){
+      console.log(err);
+     }
+   };
 
   useEffect(()=>{
     getIndustryUserMasterDetails(userId).then((response) => {
@@ -14,14 +27,7 @@ const ExamNb = () => {
 
     });
 
-    const handleLogout = () => {
-      // Remove the token and user ID from local storage
-      localStorage.removeItem("token");
-      localStorage.removeItem("userId");
-
-      // Redirect to the login page
-      window.location.replace("/login");
-    };
+   
   },[userId])
    
   return (
@@ -42,17 +48,26 @@ const ExamNb = () => {
               <ul className="header-nav pull-right">
                 <li>
                   <Dropdown>
-                    <Dropdown.Toggle href="#" id="dropdown-basic" variant='transperent'>
+                    <Dropdown.Toggle
+                      href="#"
+                      id="dropdown-basic"
+                      variant="transperent"
+                    >
                       {" "}
                       <i className="fa fa-user" aria-hidden="true"></i> &nbsp;
                       {user.Name}
                     </Dropdown.Toggle>
-                    <Dropdown.Menu className='text-center'>
-                      <Dropdown.Item href="#" className='text-black'>Profile</Dropdown.Item>
-                      <Dropdown.Item href="#" className='text-black'>
+                    <Dropdown.Menu className="text-center">
+                      <Dropdown.Item href="#" className="text-black">
+                        Profile
+                      </Dropdown.Item>
+                      <Dropdown.Item
+                        href="#"
+                        onClick={handleLogout}
+                        className="text-black"
+                      >
                         Logout
                       </Dropdown.Item>
-                      
                     </Dropdown.Menu>
                   </Dropdown>
                 </li>
