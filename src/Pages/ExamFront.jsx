@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getTestCatMasterDetails } from "../Function/ExamIndex";
+import GoToTopButton from "../Section/GoToTopButton";
 
 const ExamFront = () => {
   const [activeTab, setActiveTab] = useState("tab-1");
@@ -47,6 +48,7 @@ const ExamFront = () => {
 
   return (
     <div>
+      <GoToTopButton/>
       <section className="news-style-two banner-style-18">
         <div className="container">
           <div className="inner-content">
@@ -56,7 +58,8 @@ const ExamFront = () => {
                   <div className="content-box wall-box">
                     <div className="tabs-box">
                       <div className="tab-btn-box">
-                        <ul className="tab-btns tab-buttons clearfix">
+                        <ul className="tab-btns tab-buttons clearfix resMob "> 
+
                           <li
                             className={`tab-btn ${
                               activeTab === "tab-1" ? "active-btn" : ""

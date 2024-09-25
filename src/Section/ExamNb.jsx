@@ -55,6 +55,27 @@ const ExamNb = () => {
                     >
                       {" "}
                       <i className="fa fa-user" aria-hidden="true"></i> &nbsp;
+                      Help and Support
+                    </Dropdown.Toggle>
+                    <Dropdown.Menu className="text-center">
+                      <Dropdown.Item href="#" className="text-black">
+                        Ms. Shilpa Shah
+                      </Dropdown.Item>
+                      <Dropdown.Item href="#" className="text-black">
+                        +91 9687607283
+                      </Dropdown.Item>
+                    </Dropdown.Menu>
+                  </Dropdown>
+                </li>
+                <li>
+                  <Dropdown>
+                    <Dropdown.Toggle
+                      href="#"
+                      id="dropdown-basic"
+                      variant="transperent"
+                    >
+                      {" "}
+                      <i className="fa fa-user" aria-hidden="true"></i> &nbsp;
                       {user.Name}
                     </Dropdown.Toggle>
                     <Dropdown.Menu className="text-center">
@@ -71,9 +92,6 @@ const ExamNb = () => {
                     </Dropdown.Menu>
                   </Dropdown>
                 </li>
-                <li>
-                  <a href="#">Help & Support</a>
-                </li>
               </ul>
             </div>
           </div>
@@ -84,7 +102,7 @@ const ExamNb = () => {
               <div className="main-box clearfix">
                 <div className="logo-box pull-left">
                   <figure className="logo">
-                    <Link to="/">
+                    <Link to="/examindex">
                       <img src={logo} alt="Logo" />
                     </Link>
                   </figure>

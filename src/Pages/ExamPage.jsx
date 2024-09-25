@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { createTestData, createTestResult, getTestCatMasterDetails, getTestQuestions } from "../Function/ExamIndex";
+import GoToTopButton from "../Section/GoToTopButton";
 const ExamPage = () => {
    const navigate = useNavigate();
 
@@ -196,6 +197,8 @@ const handleSubmit = async () => {
 
   return (
     <section className="service-details banner-style-18">
+      <GoToTopButton />
+
       <div className="container">
         <div className="row exam-port">
           <div className="col-lg-12 col-md-12 col-sm-12 content-side">

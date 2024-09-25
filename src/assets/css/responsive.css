@@ -8,6 +8,14 @@
 
 }
 
+
+@media (max-width: 426px){
+  .resMob{
+        margin-top: 50px;
+    padding-top: 10px;
+  }
+}
+
 @media only screen and (max-width: 1799px){
 
   .testimonial-style-four .testimonial-content .inner-box .icon-box{
