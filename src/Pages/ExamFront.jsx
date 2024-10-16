@@ -43,7 +43,7 @@ const ExamFront = () => {
   };
 
   if (!testdata) {
-    return <div>Loading...</div>; // Handle loading state
+    return <div></div>; // Handle loading state
   }
 
   return (
@@ -58,7 +58,7 @@ const ExamFront = () => {
                   <div className="content-box wall-box">
                     <div className="tabs-box">
                       <div className="tab-btn-box">
-                        <ul className="tab-btns tab-buttons clearfix resMob "> 
+                        <ul className="tab-btns tab-buttons clearfix resMob pl-0"> 
 
                           <li
                             className={`tab-btn ${

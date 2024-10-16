@@ -28,7 +28,7 @@ function App() {
         <Route path="/" element={<Layout />}>
           <Route index element={<ExamLogin />} />
           <Route
-            path="/examIndex"
+            path="/examDashBoard"
             element={<PrivateRoute component={ExamIndex} />}
           />
           <Route

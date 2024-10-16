@@ -39,7 +39,7 @@ const ExamResult = () => {
             </div>
           </div>
           <div className="more-btn mt-3">
-            <Link to="/examIndex" className="theme-btn-two">
+            <Link to="/examDashBoard" className="theme-btn-two">
               Home Page
             </Link>
           </div>

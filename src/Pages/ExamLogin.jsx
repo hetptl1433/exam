@@ -42,7 +42,7 @@ const handleSubmit = () => {
         if (res.data.isOk) {
           localStorage.setItem("token", res.data.token);
           localStorage.setItem("userId", res.data.data._id); // Store the JWT token
-          window.location.replace("/examIndex");
+          window.location.replace("/examDashBoard");
         } else {
           toast.error("Authentication failed!");
           setValues(initialState);

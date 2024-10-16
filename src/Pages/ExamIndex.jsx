@@ -55,7 +55,7 @@ useEffect(()=>{
                     data-wow-duration="1500ms"
                   >
                     <div className="inner-box">
-                      <figure className="image-box">
+                      <figure className="image-box mb-0">
                         <a href={`examCourse/${course.categoryName}`}>
                           <img src={img} alt={course.altText} />
                         </a>

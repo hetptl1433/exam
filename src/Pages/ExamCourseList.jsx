@@ -60,7 +60,7 @@ const ExamCourseList = () => {
                     data-wow-duration="1500ms"
                   >
                     <div className="inner-box">
-                      <figure className="image-box">
+                      <figure className="image-box mb-0">
                         <a onClick={() => checkUserData(`${course._id}`)}>
                           <img
                             src={`${process.env.REACT_APP_API_URL_BPC}/${course.productImage}`}

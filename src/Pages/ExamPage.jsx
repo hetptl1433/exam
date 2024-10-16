@@ -7,6 +7,7 @@ const ExamPage = () => {
    const navigate = useNavigate();
 
   const { id, Language } = useParams();
+  const [testInfo, setTestInfo] = useState({});
   const [questionData, setQuestionData] = useState([]);
   const [activeTab, setActiveTab] = useState("question-box-1");
   const [selectedOptions, setSelectedOptions] = useState({});
@@ -31,11 +32,10 @@ const ExamPage = () => {
         );
         setQuestionData(sortedQuestions);
         const testRes= await getTestCatMasterDetails(id);
-        
+        setTestInfo(testRes);
        const totalTimeInSeconds = testRes.data.TotalTime;
        const totalTimeInMinutes = totalTimeInSeconds * 60;
        setTotalTime(totalTimeInMinutes);
-       console.log(totalTimeInMinutes);
         const totalTime = totalTimeInMinutes; 
         setRemainingTime(totalTime);
 
@@ -138,7 +138,7 @@ const handleSubmit = async () => {
           Language,
           questionId,
           selectedOption: value,
-          pointMasterId,
+          pointMasterId: pointMasterId ,
           questionNumber,
           IsActive,
         };
@@ -150,6 +150,8 @@ const handleSubmit = async () => {
 
     // Send the entire array of entries to createTestData in one API call
     try {
+      
+    navigate("/examResult");
       await createTestData(submissionData); // Send all data at once
       console.log("All test results sent successfully.");
     } catch (error) {
@@ -164,7 +166,6 @@ const handleSubmit = async () => {
       totalTime
     );
 
-    navigate("/examResult");
   } else {
     window.alert(
       "Please select an option for all questions before submitting."
@@ -206,13 +207,17 @@ const handleSubmit = async () => {
               <div className="inner-box">
                 <div className="top-content">
                   <div className="sec-title d-flex justify-content-between align-items-center">
-                    <h2>Study Habit Inventory</h2>
+                    {testInfo && testInfo.data ? (
+                      <h2>{testInfo.data.TestName}</h2>
+                    ) : (
+                      <p>Loading...</p> // Placeholder while data is being fetched
+                    )}
+
                     <p>Time Remaining: {formatTime(remainingTime)}</p>
                   </div>
                   <p>
-                    Welcome to the Study Habit Inventory! Please answer the
-                    following questions to help us understand your study habits
-                    and preferences.
+                    Welcome to the Test! Please answer the following questions
+                    to help us understand your study habits and preferences.
                   </p>
 
                   <div id="page-wrap">
@@ -253,11 +258,13 @@ const handleSubmit = async () => {
                                           __html: question.EngQues,
                                         }}
                                       ></div>
-                                      <div
-                                        dangerouslySetInnerHTML={{
-                                          __html: question.HinQues,
-                                        }}
-                                      ></div>
+                                      {question.QuesType === "Text" && (
+                                        <div
+                                          dangerouslySetInnerHTML={{
+                                            __html: question.HinQues,
+                                          }}
+                                        ></div>
+                                      )}
                                     </>
                                   )}
                                   {Language === "hindi" && (
@@ -267,11 +274,13 @@ const handleSubmit = async () => {
                                           __html: question.HinQues,
                                         }}
                                       ></div>
-                                      <div
-                                        dangerouslySetInnerHTML={{
-                                          __html: question.EngQues,
-                                        }}
-                                      ></div>
+                                      {question.QuesType === "Text" && (
+                                        <div
+                                          dangerouslySetInnerHTML={{
+                                            __html: question.EngQues,
+                                          }}
+                                        ></div>
+                                      )}
                                     </>
                                   )}
                                   {Language === "gujarati" && (
@@ -281,11 +290,13 @@ const handleSubmit = async () => {
                                           __html: question.GujQues,
                                         }}
                                       ></div>
-                                      <div
-                                        dangerouslySetInnerHTML={{
-                                          __html: question.EngQues,
-                                        }}
-                                      ></div>
+                                      {question.QuesType === "Text" && (
+                                        <div
+                                          dangerouslySetInnerHTML={{
+                                            __html: question.EngQues,
+                                          }}
+                                        ></div>
+                                      )}
                                     </>
                                   )}
                                 </div>

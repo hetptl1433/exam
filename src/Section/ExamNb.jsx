@@ -33,7 +33,7 @@ const ExamNb = () => {
   return (
     <div>
       <header className="main-header style-three">
-        <div className="header-top">
+        <div className="header-top" style={{ height: "50px" }}>
           <div className="container">
             <div className="inner-container clearfix">
               <ul className="header-info pull-left">
@@ -102,7 +102,7 @@ const ExamNb = () => {
               <div className="main-box clearfix">
                 <div className="logo-box pull-left">
                   <figure className="logo">
-                    <Link to="/examindex">
+                    <Link to="/examDashBoard">
                       <img src={logo} alt="Logo" />
                     </Link>
                   </figure>
